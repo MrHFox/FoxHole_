@@ -30,6 +30,7 @@ void StatisticsPage::updateStatistics()
     int lPawrate = this->model->getHashrate();
     double lPawrate2 = 0.000;
     double nSubsidy = 0;
+    int volume = getTotalVolume();
     int peers = this->model->getNumConnections();
     if(nHeight < 1960000)
     {
@@ -47,12 +48,14 @@ void StatisticsPage::updateStatistics()
     QString pawrate = QString::number(pPawrate2, 'f', 3);
     QString Qlpawrate = QString::number(lPawrate2, 'f', 3);
     QString QPeers = QString::number(peers);
+    QString qVolume = QString::number(volume);
     ui->heightBox->setText(height);
     ui->rewardBox->setText(subsidy);
     ui->diffBox->setText(difficulty);
     ui->pawrateBox->setText(pawrate + " KH/s");
     ui->localBox->setText(Qlpawrate + " KH/s");
     ui->connectionBox->setText(QPeers);
+    ui->volumeBox->setText(qVolume + " FOX");
 }
 
 void StatisticsPage::setModel(ClientModel *model)
