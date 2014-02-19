@@ -103,6 +103,20 @@ void RPCTypeCheck(const Object& o,
     }
 }
 
+int getTotalVolume()
+{
+    int nHeight = pindexBest->nHeight;
+    
+    if(nHeight < 196000)
+    {
+        return (nHeight * (250 - (nHeight * .0000625))) - 250;
+    }
+    else
+    {
+        return (1960000 * (250 - 120)) + (5 * (nHeight - 1960000));
+    }
+}
+
 double GetDifficulty(const CBlockIndex* blockindex = NULL)
 {
     // Floating point number that is a multiple of the minimum difficulty,
@@ -313,6 +327,15 @@ Value gethardness(const Array& params, bool fHelp)
     return GetDifficulty();
 }
 
+Value gettotalvolume(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() != 0)
+        throw runtime_error(
+            "gettotalvolume\n"
+            "Returns the total amount of FOX in circulation (approximate).");
+
+    return getTotalVolume();
+}
 
 // Litecoin: Return average network hashes per second based on last number of blocks.
 Value GetNetworkHashPS(int lookup) {
@@ -414,6 +437,7 @@ Value getinfo(const Array& params, bool fHelp)
     obj.push_back(Pair("Protocol Version:", (int)PROTOCOL_VERSION));
     obj.push_back(Pair("Wallet Version:",   pwalletMain->GetVersion()));
     obj.push_back(Pair("FOX Balance:",      ValueFromAmount(pwalletMain->GetBalance())));
+    obj.push_back(Pair("Total Volume:",     (int)getTotalVolume()));
     obj.push_back(Pair("Acres:",            (int)nBestHeight));
     obj.push_back(Pair("Connections:",      (int)vNodes.size()));
     obj.push_back(Pair("Proxy:",            (addrProxy.IsValid() ? addrProxy.ToStringIPPort() : string())));
@@ -2330,6 +2354,7 @@ static const CRPCCommand vRPCCommands[] =
     { "getpeerinfo",            &getpeerinfo,            true },
     { "gethardness",            &gethardness,            true },
     { "getdifficulty",          &gethardness,            true },
+    { "gettotalvolume",         &gettotalvolume,         true },
     { "getnetworkpawsps",       &getnetworkpawsps,       true },
     { "getnetworkhashps",       &getnetworkpawsps,       true },
     { "getgenerate",            &getgenerate,            true },
@@ -2345,6 +2370,7 @@ static const CRPCCommand vRPCCommands[] =
     { "getaccountopening",      &getaccountopening,      true },
     { "setaccount",             &setaccount,             true },
     { "getaccount",             &getaccount,             false },
+    { "getaddressesbyaccount",  &getopeningsbyaccount,   true },
     { "getopeningsbyaccount",   &getopeningsbyaccount,   true },
     { "sendtoaddress",          &sendtoopening,          true },
     { "sendtoopening",          &sendtoopening,          false },
