@@ -11,7 +11,7 @@
 // client versioning
 //
 
-// These need to be macro's, as version.cpp's voodoo requires it
+// These need to be macro's, as version.cpp's voodoo requires it. Voodoo doll aquired.
 #define CLIENT_VERSION_MAJOR       1
 #define CLIENT_VERSION_MINOR       5
 #define CLIENT_VERSION_REVISION    2
