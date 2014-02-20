@@ -33,9 +33,18 @@ public:
     
     void setModel(ClientModel *model);
     
+    int heightPrevious;
+    int connectionPrevious;
+    int volumePrevious;
+    double rewardPrevious;
+    double netPawratePrevious;
+    double pawratePrevious;
+    double diffPrevious;
+    
 public slots:
     
     void updateStatistics();
+    void updatePrevious(int, double, double, double, double, int, int);
 
 private slots:
 
