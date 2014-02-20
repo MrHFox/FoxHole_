@@ -21,6 +21,14 @@ StatisticsPage::StatisticsPage(QWidget *parent) :
     connect(ui->startButton, SIGNAL(pressed()), this, SLOT(updateStatistics()));
 }
 
+int heightPrevious = -1;
+int connectionPrevious = -1;
+int volumePrevious = -1;
+double rewardPrevious = -1;
+double netPawratePrevious = -1;
+double pawratePrevious = -1;
+double diffPrevious = -1;
+
 void StatisticsPage::updateStatistics()
 {    
     double pDifficulty = this->model->GetDifficulty();
@@ -49,13 +57,77 @@ void StatisticsPage::updateStatistics()
     QString Qlpawrate = QString::number(lPawrate2, 'f', 3);
     QString QPeers = QString::number(peers);
     QString qVolume = QString::number(volume);
+    if(nHeight > heightPrevious)
+    {
+        ui->heightBox->setText("<b><font color=\"green\">" + height + "</font></b>");
+    } else {
     ui->heightBox->setText(height);
+    }
+    
+    if(nSubsidy < rewardPrevious)
+    {
+        ui->rewardBox->setText("<b><font color=\"red\">" + subsidy + "</font></b>");
+    } else {
     ui->rewardBox->setText(subsidy);
-    ui->diffBox->setText(difficulty);
-    ui->pawrateBox->setText(pawrate + " KH/s");
-    ui->localBox->setText(Qlpawrate + " KH/s");
-    ui->connectionBox->setText(QPeers);
-    ui->volumeBox->setText(qVolume + " FOX");
+    }
+    
+    if(pDifficulty > diffPrevious)
+    {
+        ui->diffBox->setText("<b><font color=\"green\">" + difficulty + "</font></b>");        
+    } else if(pDifficulty < diffPrevious) {
+        ui->diffBox->setText("<b><font color=\"red\">" + difficulty + "</font></b>");
+    } else {
+        ui->diffBox->setText(difficulty);        
+    }
+    
+    if(pPawrate2 > netPawratePrevious)
+    {
+        ui->pawrateBox->setText("<b><font color=\"green\">" + pawrate + " KH/s</font></b>");             
+    } else if(pPawrate2 < netPawratePrevious) {
+        ui->pawrateBox->setText("<b><font color=\"red\">" + pawrate + " KH/s</font></b>");        
+    } else {
+        ui->pawrateBox->setText(pawrate + " KH/s");        
+    }
+    
+    if(lPawrate > pawratePrevious)
+    {
+        ui->localBox->setText("<b><font color=\"green\">" + Qlpawrate + " KH/s</font></b>");             
+    } else if(lPawrate < pawratePrevious) {
+        ui->localBox->setText("<b><font color=\"red\">" + Qlpawrate + " KH/s</font></b>");        
+    } else {
+        ui->localBox->setText(Qlpawrate + " KH/s");      
+    }
+    
+    if(peers > connectionPrevious)
+    {
+        ui->connectionBox->setText("<b><font color=\"green\">" + QPeers + "</font></b>");             
+    } else if(peers < connectionPrevious) {
+        ui->connectionBox->setText("<b><font color=\"red\">" + QPeers + "</font></b>");        
+    } else {
+        ui->connectionBox->setText(QPeers);  
+    }
+
+    if(volume > volumePrevious)
+    {
+        ui->volumeBox->setText("<b><font color=\"green\">" + qVolume + " FOX" + "</font></b>");             
+    } else if(volume < volumePrevious) {
+        ui->volumeBox->setText("<b><font color=\"red\">" + qVolume + " FOX" + "</font></b>");        
+    } else {
+        ui->volumeBox->setText(qVolume + " FOX");  
+    }
+    // ui->volumeBox->setText(qVolume + " FOX");
+    updatePrevious(nHeight, nSubsidy, pDifficulty, pPawrate2, lPawrate, peers, volume);
+}
+
+void StatisticsPage::updatePrevious(int nHeight, double nSubsidy, double pDifficulty, double pPawrate2, double lPawrate, int peers, int volume)
+{
+    heightPrevious = nHeight;
+    rewardPrevious = nSubsidy;
+    diffPrevious = pDifficulty;
+    netPawratePrevious = pPawrate2;
+    pawratePrevious = lPawrate;
+    connectionPrevious = peers;
+    volumePrevious = volume;
 }
 
 void StatisticsPage::setModel(ClientModel *model)
