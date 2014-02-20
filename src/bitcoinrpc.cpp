@@ -453,6 +453,36 @@ Value getinfo(const Array& params, bool fHelp)
     return obj;
 }
 
+Value getinfolegacy(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() != 0)
+        throw runtime_error(
+            "getinfo\n"
+            "Returns an object containing various state info.");
+
+    CService addrProxy;
+    GetProxy(NET_IPV4, addrProxy);
+
+    Object obj;
+    obj.push_back(Pair("version", (int)CLIENT_VERSION));
+    obj.push_back(Pair("protocolversion",(int)PROTOCOL_VERSION));
+    obj.push_back(Pair("walletversion", pwalletMain->GetVersion()));
+    obj.push_back(Pair("balance", ValueFromAmount(pwalletMain->GetBalance())));
+    obj.push_back(Pair("blocks", (int)nBestHeight));
+    obj.push_back(Pair("connections", (int)vNodes.size()));
+    obj.push_back(Pair("proxy", (addrProxy.IsValid() ? addrProxy.ToStringIPPort() : string())));
+    obj.push_back(Pair("difficulty", (double)GetDifficulty()));
+    obj.push_back(Pair("testnet", fTestNet));
+    obj.push_back(Pair("keypoololdest", (boost::int64_t)pwalletMain->GetOldestKeyPoolTime()));
+    obj.push_back(Pair("keypoolsize", pwalletMain->GetKeyPoolSize()));
+    obj.push_back(Pair("paytxfee", ValueFromAmount(nTransactionFee)));
+    obj.push_back(Pair("mininput", ValueFromAmount(nMinimumInputValue)));
+    if (pwalletMain->IsCrypted())
+        obj.push_back(Pair("unlocked_until", (boost::int64_t)nWalletUnlockTime / 1000));
+    obj.push_back(Pair("errors", GetWarnings("statusbar")));
+    return obj;
+}
+
 
 Value getdigginginfo(const Array& params, bool fHelp)
 {
@@ -473,6 +503,28 @@ Value getdigginginfo(const Array& params, bool fHelp)
     obj.push_back(Pair("Network Paws Per Second:",  getnetworkpawsps(params, false)));
     obj.push_back(Pair("Pooled TX:",                (uint64_t)mempool.size()));
     obj.push_back(Pair("Testnet:",                  fTestNet));
+    return obj;
+}
+
+Value getdigginginfolegacy(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() != 0)
+        throw runtime_error(
+            "getmininginfo\n"
+            "Returns an object containing mining-related information.");
+
+    Object obj;
+    obj.push_back(Pair("blocks", (int)nBestHeight));
+    obj.push_back(Pair("currentblocksize",(uint64_t)nLastBlockSize));
+    obj.push_back(Pair("currentblocktx",(uint64_t)nLastBlockTx));
+    obj.push_back(Pair("difficulty", (double)GetDifficulty()));
+    obj.push_back(Pair("errors", GetWarnings("statusbar")));
+    obj.push_back(Pair("generate", GetBoolArg("-gen")));
+    obj.push_back(Pair("genproclimit", (int)GetArg("-genproclimit", -1)));
+    obj.push_back(Pair("hashespersec", getpawspersec(params, false)));
+    obj.push_back(Pair("networkhashps", getnetworkpawsps(params, false)));
+    obj.push_back(Pair("pooledtx", (uint64_t)mempool.size()));
+    obj.push_back(Pair("testnet", fTestNet));
     return obj;
 }
 
@@ -2361,8 +2413,9 @@ static const CRPCCommand vRPCCommands[] =
     { "setgenerate",            &setgenerate,            true },
     { "gethashespersec",        &getpawspersec,          true },
     { "getpawspersec",          &getpawspersec,          true },
-    { "getinfo",                &getinfo,                true },
-    { "getmininginfo",          &getdigginginfo,         true },
+    { "getfoxinfo",             &getinfo,                true },
+    { "getinfo",                &getinfolegacy,          true },
+    { "getmininginfo",          &getdigginginfolegacy,   true },
     { "getdigginginfo",         &getdigginginfo,         true },
     { "getnewaddress",          &getnewopening,          true },
     { "getnewopening",          &getnewopening,          true },
