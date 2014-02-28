@@ -114,16 +114,7 @@ int GetNumBlocksOfPeers();
 bool IsInitialBlockDownload();
 std::string GetWarnings(std::string strFor);
 bool GetTransaction(const uint256 &hash, CTransaction &tx, uint256 &hashBlock);
-
-
-
-
-
-
-
-
-
-
+unsigned int TrollNeoGetNextWorkRequired(const CBlockIndex* pindexLast);
 
 bool GetWalletFile(CWallet* pwallet, std::string &strWalletFileOut);
 
