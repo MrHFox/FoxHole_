@@ -62,7 +62,7 @@
      <item row="0" column="0">
       <widget class="QLabel" name="label">
        <property name="text">
-        <string>Block Height:</string>
+        <string>Acre Height:</string>
        </property>
       </widget>
      </item>
@@ -76,21 +76,21 @@
      <item row="1" column="0">
       <widget class="QLabel" name="label_3">
        <property name="text">
-        <string>Block Reward:</string>
+        <string>Acre Reward:</string>
        </property>
       </widget>
      </item>
      <item row="1" column="1">
       <widget class="QLabel" name="rewardBox">
        <property name="text">
-        <string>248.21315</string>
+        <string>250</string>
        </property>
       </widget>
      </item>
      <item row="2" column="0">
       <widget class="QLabel" name="label_5">
        <property name="text">
-        <string>Difficulty:</string>
+        <string>Hardness:</string>
        </property>
       </widget>
      </item>
@@ -104,21 +104,21 @@
      <item row="2" column="1">
       <widget class="QLabel" name="diffBox">
        <property name="text">
-        <string>2.02134262</string>
+        <string>0.0002</string>
        </property>
       </widget>
      </item>
      <item row="3" column="1">
       <widget class="QLabel" name="pawrateBox">
        <property name="text">
-        <string>9001 KH/s</string>
+        <string>0 KH/s</string>
        </property>
       </widget>
      </item>
      <item row="4" column="1">
       <widget class="QLabel" name="localBox">
        <property name="text">
-        <string>9 KH/s</string>
+        <string>0 KH/s</string>
        </property>
       </widget>
      </item>
@@ -145,21 +145,21 @@
      <item row="5" column="1">
       <widget class="QLabel" name="connectionBox">
        <property name="text">
-        <string>16</string>
+        <string>0</string>
        </property>
       </widget>
      </item>
      <item row="7" column="0">
       <widget class="QLabel" name="label2">
        <property name="text">
-        <string>Next Difficulty:</string>
+        <string>Next Hardness:</string>
        </property>
       </widget>
      </item>
      <item row="7" column="1">
       <widget class="QLabel" name="nextBox">
        <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Coming Soon&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>0</string>
        </property>
       </widget>
      </item>
@@ -173,7 +173,7 @@
      <item row="6" column="1">
       <widget class="QLabel" name="volumeBox">
        <property name="text">
-        <string>OVER 9000!</string>
+        <string>250</string>
        </property>
       </widget>
      </item>
