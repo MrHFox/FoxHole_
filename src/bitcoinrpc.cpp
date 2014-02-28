@@ -103,6 +103,42 @@ void RPCTypeCheck(const Object& o,
     }
 }
 
+double GetEstimatedNextHardness(const CBlockIndex* blockindex = NULL){
+    if (blockindex == NULL)
+    {
+        if (pindexBest == NULL)
+            return 1.0;
+        else
+            blockindex = pindexBest;
+    }
+
+    unsigned int nBits;
+    nBits = TrollNeoGetNextWorkRequired(blockindex);
+
+    int nShift = (nBits >> 24) & 0xff;
+
+    double dDiff = (double)0x0000ffff / (double)(nBits & 0x00ffffff);
+
+    while (nShift < 29)
+    {
+        dDiff *= 256.0;
+        nShift++;
+    }
+    while (nShift > 29)
+    {
+        dDiff /= 256.0;
+        nShift--;
+    }
+
+    return dDiff;
+}
+
+double GetEstimatedNextTrap()
+{
+    // Admiral Chainbar
+    return GetEstimatedNextHardness();
+}
+
 int getTotalVolume()
 {
     int nHeight = pindexBest->nHeight;
@@ -232,7 +268,7 @@ Object blockToJSON(const CBlock& block, const CBlockIndex* blockindex)
     result.push_back(Pair("time", (boost::int64_t)block.GetBlockTime()));
     result.push_back(Pair("nonce", (boost::uint64_t)block.nNonce));
     result.push_back(Pair("bits", HexBits(block.nBits)));
-    result.push_back(Pair("difficulty", GetDifficulty(blockindex)));
+    result.push_back(Pair("Hardness:", GetDifficulty(blockindex)));
 
     if (blockindex->pprev)
         result.push_back(Pair("previousblockhash", blockindex->pprev->GetBlockHash().GetHex()));
@@ -316,6 +352,15 @@ Value getacrecount(const Array& params, bool fHelp)
     return nBestHeight;
 }
 
+Value getestimatednexthardness(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() != 0)
+        throw runtime_error(
+            "getestimatednexthardness\n"
+            "Returns estimated next proof-of-work hardness as a gravity well readjusted difficulty.");
+
+    return GetEstimatedNextHardness();
+}
 
 Value gethardness(const Array& params, bool fHelp)
 {
@@ -2406,6 +2451,7 @@ static const CRPCCommand vRPCCommands[] =
     { "getpeerinfo",            &getpeerinfo,            true },
     { "gethardness",            &gethardness,            true },
     { "getdifficulty",          &gethardness,            true },
+    { "getestimatednexthardness",	&getestimatednexthardness,      true },
     { "gettotalvolume",         &gettotalvolume,         true },
     { "getnetworkpawsps",       &getnetworkpawsps,       true },
     { "getnetworkhashps",       &getnetworkpawsps,       true },
