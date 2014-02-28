@@ -38,6 +38,7 @@ void StatisticsPage::updateStatistics()
     int lPawrate = this->model->getHashrate();
     double lPawrate2 = 0.000;
     double nSubsidy = 0;
+    double nextHardness = GetEstimatedNextTrap();
     int volume = getTotalVolume();
     int peers = this->model->getNumConnections();
     if(nHeight < 1960000)
@@ -53,10 +54,11 @@ void StatisticsPage::updateStatistics()
     QString height = QString::number(nHeight);
     QString subsidy = QString::number(nSubsidy, 'f', 6);
     QString difficulty = QString::number(pDifficulty, 'f', 6);
+    QString QnextHardness = QString::number(nextHardness, 'f', 6);
     QString pawrate = QString::number(pPawrate2, 'f', 3);
     QString Qlpawrate = QString::number(lPawrate2, 'f', 3);
     QString QPeers = QString::number(peers);
-    QString qVolume = QString::number(volume);
+    QString qVolume = QLocale(QLocale::English).toString(volume);
     if(nHeight > heightPrevious)
     {
         ui->heightBox->setText("<b><font color=\"green\">" + height + "</font></b>");
@@ -78,6 +80,15 @@ void StatisticsPage::updateStatistics()
         ui->diffBox->setText("<b><font color=\"red\">" + difficulty + "</font></b>");
     } else {
         ui->diffBox->setText(difficulty);        
+    }
+    
+    if(nextHardness > pDifficulty)
+    {
+        ui->nextBox->setText("<b><font color=\"green\">" + QnextHardness + "</font></b>");        
+    } else if(nextHardness < pDifficulty) {
+        ui->nextBox->setText("<b><font color=\"red\">" + QnextHardness + "</font></b>"); 
+    } else {
+        ui->nextBox->setText(QnextHardness);        
     }
     
     if(pPawrate2 > netPawratePrevious)
@@ -115,7 +126,6 @@ void StatisticsPage::updateStatistics()
     } else {
         ui->volumeBox->setText(qVolume + " FOX");  
     }
-    // ui->volumeBox->setText(qVolume + " FOX");
     updatePrevious(nHeight, nSubsidy, pDifficulty, pPawrate2, lPawrate, peers, volume);
 }
 
