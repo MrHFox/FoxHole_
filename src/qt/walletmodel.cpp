@@ -122,7 +122,7 @@ bool WalletModel::validateAddress(const QString &address)
     return addressParsed.IsValid();
 }
 
-WalletModel::SendCoinsReturn WalletModel::sendCoins(const QList<SendCoinsRecipient> &recipients)
+WalletModel::SendCoinsReturn WalletModel::sendCoins(const QList<SendCoinsRecipient> &recipients, int txHandle)
 {
     qint64 total = 0;
     QSet<QString> setAddress;
@@ -159,9 +159,12 @@ WalletModel::SendCoinsReturn WalletModel::sendCoins(const QList<SendCoinsRecipie
         return AmountExceedsBalance;
     }
 
+    if(txHandle == 1)
+    {
     if((total + nTransactionFee) > getBalance())
     {
         return SendCoinsReturn(AmountWithFeeExceedsBalance, nTransactionFee);
+    }
     }
 
     {

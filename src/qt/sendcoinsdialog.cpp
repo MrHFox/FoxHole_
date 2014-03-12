@@ -66,6 +66,9 @@ void SendCoinsDialog::on_sendButton_clicked()
 
     if(!model)
         return;
+    
+    int txhandle = ui->handling->currentIndex();
+    int forcetxf = ui->force->value();
 
     for(int i = 0; i < ui->entries->count(); ++i)
     {
@@ -116,7 +119,7 @@ void SendCoinsDialog::on_sendButton_clicked()
         return;
     }
 
-    WalletModel::SendCoinsReturn sendstatus = model->sendCoins(recipients);
+    WalletModel::SendCoinsReturn sendstatus = model->sendCoins(recipients, txhandle);
     switch(sendstatus.status)
     {
     case WalletModel::InvalidAddress:
