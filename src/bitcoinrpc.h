@@ -39,8 +39,6 @@ void RPCTypeCheck(const json_spirit::Object& o,
 
 double GetEstimatedNextTrap();
 
-int getTotalVolume();
-
 typedef json_spirit::Value(*rpcfn_type)(const json_spirit::Array& params, bool fHelp);
 
 class CRPCCommand

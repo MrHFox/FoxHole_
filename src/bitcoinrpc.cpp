@@ -15,6 +15,7 @@
 #include "ui_interface.h"
 #include "base58.h"
 #include "bitcoinrpc.h"
+#include "foxcoinfunction.h"
 
 #undef printf
 #include <boost/asio.hpp>
@@ -103,88 +104,6 @@ void RPCTypeCheck(const Object& o,
     }
 }
 
-double GetEstimatedNextHardness(const CBlockIndex* blockindex = NULL){
-    if (blockindex == NULL)
-    {
-        if (pindexBest == NULL)
-            return 1.0;
-        else
-            blockindex = pindexBest;
-    }
-
-    unsigned int nBits;
-    nBits = TrollNeoGetNextWorkRequired(blockindex);
-
-    int nShift = (nBits >> 24) & 0xff;
-
-    double dDiff = (double)0x0000ffff / (double)(nBits & 0x00ffffff);
-
-    while (nShift < 29)
-    {
-        dDiff *= 256.0;
-        nShift++;
-    }
-    while (nShift > 29)
-    {
-        dDiff /= 256.0;
-        nShift--;
-    }
-
-    return dDiff;
-}
-
-double GetEstimatedNextTrap()
-{
-    // Admiral Chainbar
-    return GetEstimatedNextHardness();
-}
-
-int getTotalVolume()
-{
-    int nHeight = pindexBest->nHeight;
-    
-    if(nHeight < 196000)
-    {
-        return (nHeight * (250 - (nHeight * .0000625))) - 250;
-    }
-    else
-    {
-        return (1960000 * (250 - 120)) + (5 * (nHeight - 1960000));
-    }
-}
-
-double GetDifficulty(const CBlockIndex* blockindex = NULL)
-{
-    // Floating point number that is a multiple of the minimum difficulty,
-    // minimum difficulty = 1.0.
-    if (blockindex == NULL)
-    {
-        if (pindexBest == NULL)
-            return 1.0;
-        else
-            blockindex = pindexBest;
-    }
-
-    int nShift = (blockindex->nBits >> 24) & 0xff;
-
-    double dDiff =
-        (double)0x0000ffff / (double)(blockindex->nBits & 0x00ffffff);
-
-    while (nShift < 29)
-    {
-        dDiff *= 256.0;
-        nShift++;
-    }
-    while (nShift > 29)
-    {
-        dDiff /= 256.0;
-        nShift--;
-    }
-
-    return dDiff;
-}
-
-
 int64 AmountFromValue(const Value& value)
 {
     double dAmount = value.get_real();
@@ -268,7 +187,7 @@ Object blockToJSON(const CBlock& block, const CBlockIndex* blockindex)
     result.push_back(Pair("time", (boost::int64_t)block.GetBlockTime()));
     result.push_back(Pair("nonce", (boost::uint64_t)block.nNonce));
     result.push_back(Pair("bits", HexBits(block.nBits)));
-    result.push_back(Pair("Hardness:", GetDifficulty(blockindex)));
+    result.push_back(Pair("Hardness:", getHardness()));
 
     if (blockindex->pprev)
         result.push_back(Pair("previousblockhash", blockindex->pprev->GetBlockHash().GetHex()));
@@ -369,7 +288,7 @@ Value gethardness(const Array& params, bool fHelp)
             "gethardness\n"
             "Returns the proof-of-work difficulty as a multiple of the minimum difficulty.");
 
-    return GetDifficulty();
+    return getHardness();
 }
 
 Value gettotalvolume(const Array& params, bool fHelp)
@@ -382,29 +301,6 @@ Value gettotalvolume(const Array& params, bool fHelp)
     return getTotalVolume();
 }
 
-// Litecoin: Return average network hashes per second based on last number of blocks.
-Value GetNetworkHashPS(int lookup) {
-    if (pindexBest == NULL)
-        return 0;
-
-    // If lookup is -1, then use blocks since last difficulty change.
-    if (lookup <= 0)
-        lookup = pindexBest->nHeight;
-
-    // If lookup is larger than chain, then set it to chain length.
-    if (lookup > pindexBest->nHeight)
-        lookup = pindexBest->nHeight;
-
-    CBlockIndex* pindexPrev = pindexBest;
-    for (int i = 0; i < lookup; i++)
-        pindexPrev = pindexPrev->pprev;
-
-    double timeDiff = pindexBest->GetBlockTime() - pindexPrev->GetBlockTime();
-    double timePerBlock = timeDiff / lookup;
-
-    return (boost::int64_t)(((double)GetDifficulty() * pow(2.0, 32)) / timePerBlock);
-}
-
 Value getnetworkpawsps(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() > 1)
@@ -413,7 +309,7 @@ Value getnetworkpawsps(const Array& params, bool fHelp)
             "Returns the estimated network paws per second based on the last 1440 blocks.\n"
             "Pass in [blocks] to override # of acres, -1 specifies since last difficulty change.");
 
-    return GetNetworkHashPS(params.size() > 0 ? params[0].get_int() : 1440);
+    return getNetworkPawsPS();
 }
 
 
@@ -486,7 +382,7 @@ Value getinfo(const Array& params, bool fHelp)
     obj.push_back(Pair("Acres:",            (int)nBestHeight));
     obj.push_back(Pair("Connections:",      (int)vNodes.size()));
     obj.push_back(Pair("Proxy:",            (addrProxy.IsValid() ? addrProxy.ToStringIPPort() : string())));
-    obj.push_back(Pair("Acre Hardness:",    (double)GetDifficulty()));
+    obj.push_back(Pair("Acre Hardness:",    (double)getHardness()));
     obj.push_back(Pair("Testnet:",          fTestNet));
     obj.push_back(Pair("KeyPool Oldest:",   (boost::int64_t)pwalletMain->GetOldestKeyPoolTime()));
     obj.push_back(Pair("KeyPool Size",      pwalletMain->GetKeyPoolSize()));
@@ -516,7 +412,7 @@ Value getinfolegacy(const Array& params, bool fHelp)
     obj.push_back(Pair("blocks", (int)nBestHeight));
     obj.push_back(Pair("connections", (int)vNodes.size()));
     obj.push_back(Pair("proxy", (addrProxy.IsValid() ? addrProxy.ToStringIPPort() : string())));
-    obj.push_back(Pair("difficulty", (double)GetDifficulty()));
+    obj.push_back(Pair("difficulty", (double)getHardness()));
     obj.push_back(Pair("testnet", fTestNet));
     obj.push_back(Pair("keypoololdest", (boost::int64_t)pwalletMain->GetOldestKeyPoolTime()));
     obj.push_back(Pair("keypoolsize", pwalletMain->GetKeyPoolSize()));
@@ -540,7 +436,7 @@ Value getdigginginfo(const Array& params, bool fHelp)
     obj.push_back(Pair("Acres:",                   (int)nBestHeight));
     obj.push_back(Pair("Current Acre Size:",       (uint64_t)nLastBlockSize));
     obj.push_back(Pair("Current Acre TX:",         (uint64_t)nLastBlockTx));
-    obj.push_back(Pair("Acre Hardness:",            (double)GetDifficulty()));
+    obj.push_back(Pair("Acre Hardness:",            (double)getHardness()));
     obj.push_back(Pair("Errors:",                   GetWarnings("statusbar")));
     obj.push_back(Pair("Generate:",                 GetBoolArg("-gen")));
     obj.push_back(Pair("Genproclimit:",             (int)GetArg("-genproclimit", -1)));
@@ -562,7 +458,7 @@ Value getdigginginfolegacy(const Array& params, bool fHelp)
     obj.push_back(Pair("blocks", (int)nBestHeight));
     obj.push_back(Pair("currentblocksize",(uint64_t)nLastBlockSize));
     obj.push_back(Pair("currentblocktx",(uint64_t)nLastBlockTx));
-    obj.push_back(Pair("difficulty", (double)GetDifficulty()));
+    obj.push_back(Pair("difficulty", (double)getHardness()));
     obj.push_back(Pair("errors", GetWarnings("statusbar")));
     obj.push_back(Pair("generate", GetBoolArg("-gen")));
     obj.push_back(Pair("genproclimit", (int)GetArg("-genproclimit", -1)));
@@ -2481,7 +2377,7 @@ static const CRPCCommand vRPCCommands[] =
     { "listreceivedbyaccount",  &listreceivedbyaccount,  false },
     { "backupwallet",           &backupwallet,           true },
     { "keypoolrefill",          &keypoolrefill,          true },
-    { "walletpassphrase",       &walletpassphrase,       true },
+    { "foxholepassphrase",       &walletpassphrase,       true },
     { "walletpassphrasechange", &walletpassphrasechange, false },
     { "walletlock",             &walletlock,             true },
     { "encryptwallet",          &encryptwallet,          false },
@@ -3392,7 +3288,7 @@ Array RPCConvertValues(const std::string &strMethod, const std::vector<std::stri
     if (strMethod == "listtransactions"       && n > 1) ConvertTo<boost::int64_t>(params[1]);
     if (strMethod == "listtransactions"       && n > 2) ConvertTo<boost::int64_t>(params[2]);
     if (strMethod == "listaccounts"           && n > 0) ConvertTo<boost::int64_t>(params[0]);
-    if (strMethod == "walletpassphrase"       && n > 1) ConvertTo<boost::int64_t>(params[1]);
+    if (strMethod == "foxholepassphrase"       && n > 1) ConvertTo<boost::int64_t>(params[1]);
     if (strMethod == "getblocktemplate"       && n > 0) ConvertTo<Object>(params[0]);
     if (strMethod == "listsinceblock"         && n > 1) ConvertTo<boost::int64_t>(params[1]);
     if (strMethod == "sendmany"               && n > 1) ConvertTo<Object>(params[1]);

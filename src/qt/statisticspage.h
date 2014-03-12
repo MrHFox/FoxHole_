@@ -39,7 +39,7 @@ public:
     double rewardPrevious;
     double netPawratePrevious;
     double pawratePrevious;
-    double diffPrevious;
+    double hardnessPrevious;
     
 public slots:
     

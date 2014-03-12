@@ -51,9 +51,7 @@ public:
     QString getMiningPassword() const;
     void setMiningPassword(QString password);
 
-    int GetNetworkHashPS(int lookup) const;
     int getHashrate() const;
-    double GetDifficulty() const;
     
     QDateTime getLastBlockDate() const;
 

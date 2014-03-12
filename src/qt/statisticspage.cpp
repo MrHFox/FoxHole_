@@ -5,6 +5,7 @@
 #include "base58.h"
 #include "clientmodel.h"
 #include "bitcoinrpc.h"
+#include "foxcoinfunction.h"
 #include <sstream>
 #include <string>
 
@@ -27,33 +28,25 @@ int volumePrevious = -1;
 double rewardPrevious = -1;
 double netPawratePrevious = -1;
 double pawratePrevious = -1;
-double diffPrevious = -1;
+double hardnessPrevious = -1;
 
 void StatisticsPage::updateStatistics()
 {    
-    double pDifficulty = this->model->GetDifficulty();
-    int pPawrate = this->model->GetNetworkHashPS(-1);
+    double pHardness = getHardness();
+    int pPawrate = getNetworkPawsPS();
     double pPawrate2 = 0.000;
     int nHeight = pindexBest->nHeight;
     int lPawrate = this->model->getHashrate();
     double lPawrate2 = 0.000;
-    double nSubsidy = 0;
-    double nextHardness = GetEstimatedNextTrap();
+    double nSubsidy = getAcreReward();
+    double nextHardness = GetEstimatedNextHardness();
     int volume = getTotalVolume();
     int peers = this->model->getNumConnections();
-    if(nHeight < 1960000)
-    {
-        nSubsidy = 250.000000 - ((double)nHeight * 0.000125);
-    }
-    else
-    {
-        nSubsidy = 5;
-    }
     lPawrate2 = ((double)lPawrate / 1000);
     pPawrate2 = ((double)pPawrate / 1000);  
     QString height = QString::number(nHeight);
     QString subsidy = QString::number(nSubsidy, 'f', 6);
-    QString difficulty = QString::number(pDifficulty, 'f', 6);
+    QString hardness = QString::number(pHardness, 'f', 6);
     QString QnextHardness = QString::number(nextHardness, 'f', 6);
     QString pawrate = QString::number(pPawrate2, 'f', 3);
     QString Qlpawrate = QString::number(lPawrate2, 'f', 3);
@@ -73,19 +66,19 @@ void StatisticsPage::updateStatistics()
     ui->rewardBox->setText(subsidy);
     }
     
-    if(pDifficulty > diffPrevious)
+    if(pHardness > hardnessPrevious)
     {
-        ui->diffBox->setText("<b><font color=\"green\">" + difficulty + "</font></b>");        
-    } else if(pDifficulty < diffPrevious) {
-        ui->diffBox->setText("<b><font color=\"red\">" + difficulty + "</font></b>");
+        ui->diffBox->setText("<b><font color=\"green\">" + hardness + "</font></b>");        
+    } else if(pHardness < hardnessPrevious) {
+        ui->diffBox->setText("<b><font color=\"red\">" + hardness + "</font></b>");
     } else {
-        ui->diffBox->setText(difficulty);        
+        ui->diffBox->setText(hardness);        
     }
     
-    if(nextHardness > pDifficulty)
+    if(nextHardness > pHardness)
     {
         ui->nextBox->setText("<b><font color=\"green\">" + QnextHardness + "</font></b>");        
-    } else if(nextHardness < pDifficulty) {
+    } else if(nextHardness < pHardness) {
         ui->nextBox->setText("<b><font color=\"red\">" + QnextHardness + "</font></b>"); 
     } else {
         ui->nextBox->setText(QnextHardness);        
@@ -126,14 +119,14 @@ void StatisticsPage::updateStatistics()
     } else {
         ui->volumeBox->setText(qVolume + " FOX");  
     }
-    updatePrevious(nHeight, nSubsidy, pDifficulty, pPawrate2, lPawrate, peers, volume);
+    updatePrevious(nHeight, nSubsidy, pHardness, pPawrate2, lPawrate, peers, volume);
 }
 
-void StatisticsPage::updatePrevious(int nHeight, double nSubsidy, double pDifficulty, double pPawrate2, double lPawrate, int peers, int volume)
+void StatisticsPage::updatePrevious(int nHeight, double nSubsidy, double pHardness, double pPawrate2, double lPawrate, int peers, int volume)
 {
     heightPrevious = nHeight;
     rewardPrevious = nSubsidy;
-    diffPrevious = pDifficulty;
+    hardnessPrevious = pHardness;
     netPawratePrevious = pPawrate2;
     pawratePrevious = lPawrate;
     connectionPrevious = peers;
