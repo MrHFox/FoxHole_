@@ -34,6 +34,7 @@
 #include "notificator.h"
 #include "guiutil.h"
 #include "rpcconsole.h"
+#include "foxcoinfunction.h"
 
 #ifdef Q_WS_MAC
 #include "macdockiconhandler.h"
@@ -298,7 +299,7 @@ void BitcoinGUI::createActions()
     exportAction = new QAction(QIcon(":/icons/export"), tr("&Export..."), this);
     exportAction->setToolTip(tr("Export the data in the current tab to a file"));
     encryptWalletAction = new QAction(QIcon(":/icons/lock_closed"), tr("&Barricade FoxHole..."), this);
-    encryptWalletAction->setToolTip(tr("Barricade or de-barricade FoxHole"));
+    encryptWalletAction->setToolTip(tr("Barricade or FoxHole"));
     encryptWalletAction->setCheckable(true);
     backupWalletAction = new QAction(QIcon(":/icons/filesave"), tr("&Backup FoxHole..."), this);
     backupWalletAction->setToolTip(tr("Backup FoxHole to another location"));
@@ -639,7 +640,7 @@ void BitcoinGUI::setNumBlocks(int count, int nTotalBlocks)
         tooltip = tr("Downloaded %1 acres of transaction history.").arg(count);
     }
 
-    tooltip = tr("Current difficulty is %1.").arg(clientModel->GetDifficulty()) + QString("<br>") + tooltip;
+    tooltip = tr("Current difficulty is %1.").arg(getHardness()) + QString("<br>") + tooltip;
 
     QDateTime now = QDateTime::currentDateTime();
     QDateTime lastBlockDate = clientModel->getLastBlockDate();
