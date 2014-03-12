@@ -1,11 +1,13 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2012 The Bitcoin developers
 // Copyright (c) 2011-2012 Litecoin Developers
+// Copyright (c) 2014 The FoxCoin Foxes
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 #include "db.h"
 #include "walletdb.h"
 #include "bitcoinrpc.h"
+#include "foxcoinfunction.h"
 #include "net.h"
 #include "init.h"
 #include "util.h"
@@ -213,8 +215,8 @@ bool static Bind(const CService &addr, bool fError = true) {
     return true;
 }
 
-/* import from bitcoinrpc.cpp */
-extern double GetDifficulty(const CBlockIndex* blockindex = NULL);
+/* import from foxcoinfunction.cpp */
+extern double getHardness();
 
 // Core-specific options shared between UI and daemon
 std::string HelpMessage()
@@ -638,7 +640,7 @@ bool AppInit2()
                 block.GetPoWHash().ToString().c_str(),
                 block.nVersion,
                 //CBigNum().SetCompact(block.nBits).getuint256().ToString().c_str(),
-                GetDifficulty(pindex),
+                getHardness(),
                 block.nTime
             );
         }
