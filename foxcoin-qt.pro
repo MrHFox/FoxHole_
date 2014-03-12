@@ -161,6 +161,7 @@ HEADERS += src/qt/bitcoingui.h \
     src/qt/transactionview.h \
     src/qt/walletmodel.h \
     src/bitcoinrpc.h \
+	src/foxcoinfunction.h \
     src/qt/overviewpage.h \
     src/qt/csvmodelwriter.h \
     src/crypter.h \
@@ -227,6 +228,7 @@ SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
     src/qt/transactionview.cpp \
     src/qt/walletmodel.cpp \
     src/bitcoinrpc.cpp \
+	src/foxcoinfunction.cpp \
     src/rpcdump.cpp \
     src/rpcnet.cpp \
     src/rpcrawtransaction.cpp \
@@ -365,7 +367,7 @@ macx:OBJECTIVE_SOURCES += src/qt/macdockiconhandler.mm
 macx:LIBS += -framework Foundation -framework ApplicationServices -framework AppKit
 macx:DEFINES += MAC_OSX MSG_NOSIGNAL=0
 macx:ICON = src/qt/res/icons/bitcoin.icns
-macx:TARGET = "foxcoin-qt"
+macx:TARGET = "foocoin-qt"
 
 # Set libraries and includes at end, to use platform-defined defaults if not overridden
 INCLUDEPATH += $$BOOST_INCLUDE_PATH $$BDB_INCLUDE_PATH $$OPENSSL_INCLUDE_PATH $$QRENCODE_INCLUDE_PATH
@@ -385,6 +387,3 @@ contains(RELEASE, 1) {
 system($$QMAKE_LRELEASE -silent $$_PRO_FILE_)
 
 
-
-
-#N-dwadwa
