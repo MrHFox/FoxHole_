@@ -4,7 +4,7 @@
  */ 
 
 #include "base58.h"
-#include "bitcoinrpc.h"
+#include "foxcoinrpc.h"
 #include "db.h"
 #include "init.h"
 #include "main.h"
@@ -330,19 +330,19 @@ std::string getOutputs(std::string txid)
         std::string lol4;
         std::string lol = txout.scriptPubKey.GetID().ToString(); 
         std::string lol2 = EncodeBase58(txout.scriptPubKey);
-        std::string lol3 = CBitcoinAddress(lol).ToString();
+        std::string lol3 = CFoxcoinAddress(lol).ToString();
         std::vector<unsigned char> vch(txout.scriptPubKey);
         std::string lol5 = EncodeBase58Check(vch);
         
       //  std::string lol6;
       //  vector<CTxDestination> addresses = txout.scriptPubKey.GetID();
       //  BOOST_FOREACH(const CTxDestination& addr, addresses)
-      //  lol6 = CBitcoinAddress(addr).ToString();
+      //  lol6 = CFoxcoinAddress(addr).ToString();
         
         double buffer = convertCoins(txout.nValue);
         std::string amount = boost::to_string(buffer);
         str.append(lol3);
-        str.append(": ");And
+        str.append(": ");
         str.append(amount);
         str.append(" FOX");
         str.append("\n");        

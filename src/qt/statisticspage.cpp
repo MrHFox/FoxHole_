@@ -4,7 +4,7 @@
 #include "wallet.h"
 #include "base58.h"
 #include "clientmodel.h"
-#include "bitcoinrpc.h"
+#include "foxcoinrpc.h"
 #include "foxcoinfunction.h"
 #include <sstream>
 #include <string>
@@ -38,12 +38,16 @@ void StatisticsPage::updateStatistics()
     int nHeight = pindexBest->nHeight;
     int lPawrate = this->model->getHashrate();
     double lPawrate2 = 0.000;
-    double nSubsidy = getAcreReward();
+    double nSubsidy = getReward();
     double nextHardness = GetEstimatedNextHardness();
     int volume = getTotalVolume();
     int peers = this->model->getNumConnections();
     lPawrate2 = ((double)lPawrate / 1000);
     pPawrate2 = ((double)pPawrate / 1000);  
+    std::string hash = getAcreHash(nHeight);
+    int acreTime = getAcreTime(nHeight);
+    int acreInHour = acresInPastHours(1);
+    int acreInDay = acresInPastHours(24);
     QString height = QString::number(nHeight);
     QString subsidy = QString::number(nSubsidy, 'f', 6);
     QString hardness = QString::number(pHardness, 'f', 6);
@@ -52,6 +56,11 @@ void StatisticsPage::updateStatistics()
     QString Qlpawrate = QString::number(lPawrate2, 'f', 3);
     QString QPeers = QString::number(peers);
     QString qVolume = QLocale(QLocale::English).toString(volume);
+    QString QHash = QString::fromUtf8(hash.c_str());
+    QDateTime QRTime = QDateTime::fromTime_t(acreTime);
+    QString QTime = QRTime.toString("yyyy:MM:dd hh:mm:ss");
+    QString QHour = QString::number(acreInHour);
+    QString QDay = QString::number(acreInDay);
     if(nHeight > heightPrevious)
     {
         ui->heightBox->setText("<b><font color=\"green\">" + height + "</font></b>");
@@ -119,6 +128,10 @@ void StatisticsPage::updateStatistics()
     } else {
         ui->volumeBox->setText(qVolume + " FOX");  
     }
+    ui->hashBox->setText(QHash);
+    ui->timeBox->setText(QTime);
+    ui->hourBox->setText(QHour);
+    ui->dayBox->setText(QDay);
     updatePrevious(nHeight, nSubsidy, pHardness, pPawrate2, lPawrate, peers, volume);
 }
 

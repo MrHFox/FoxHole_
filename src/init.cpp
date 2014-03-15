@@ -6,7 +6,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 #include "db.h"
 #include "walletdb.h"
-#include "bitcoinrpc.h"
+#include "foxcoinrpc.h"
 #include "foxcoinfunction.h"
 #include "net.h"
 #include "init.h"
@@ -44,7 +44,7 @@ void ExitTimeout(void* parg)
 void StartShutdown()
 {
 #ifdef QT_GUI
-    // ensure we leave the Qt main loop for a clean GUI exit (Shutdown() is called in bitcoin.cpp afterwards)
+    // ensure we leave the Qt main loop for a clean GUI exit (Shutdown() is called in foxcoin.cpp afterwards)
     uiInterface.QueueShutdown();
 #else
     // Without UI, Shutdown() can simply be started in a new thread
@@ -58,7 +58,7 @@ void Shutdown(void* parg)
     static bool fTaken;
 
     // Make this thread recognisable as the shutdown thread
-    RenameThread("bitcoin-shutoff");
+    RenameThread("foxcoin-shutoff");
 
     bool fFirstThread = false;
     {
@@ -85,7 +85,7 @@ void Shutdown(void* parg)
         printf("foxcoin exited\n\n");
         fExit = true;
 #ifndef QT_GUI
-        // ensure non UI client get's exited here, but let Bitcoin-Qt reach return 0; in bitcoin.cpp
+        // ensure non UI client get's exited here, but let Foxcoin-Qt reach return 0; in foxcoin.cpp
         exit(0);
 #endif
     }
@@ -125,7 +125,7 @@ bool AppInit(int argc, char* argv[])
         //
         // Parameters
         //
-        // If Qt is used, parameters/litecoin.conf are parsed in qt/bitcoin.cpp's main()
+        // If Qt is used, parameters/litecoin.conf are parsed in qt/foxcoin.cpp's main()
         ParseParameters(argc, argv);
         if (!boost::filesystem::is_directory(GetDataDir(false)))
         {
