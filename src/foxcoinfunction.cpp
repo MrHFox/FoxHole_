@@ -3,8 +3,17 @@
  * Copyright (c) 2014 The FoxCoin Foxes
  */ 
 
+#include "base58.h"
+#include "bitcoinrpc.h"
+#include "db.h"
+#include "init.h"
 #include "main.h"
+#include "net.h"
+#include "wallet.h"
 #include "foxcoinfunction.h"
+
+using namespace std;
+using namespace boost;
 
 double getRawHardness(const CBlockIndex* blockindex = NULL)
 {
@@ -72,7 +81,7 @@ int getTotalVolume()
     }
 }
 
-double getAcreReward()
+double getReward()
 {
     int nHeight = pindexBest->nHeight;
     double nSubsidy = 1;
@@ -117,6 +126,229 @@ double GetRawEstimatedNextHardness(const CBlockIndex* blockindex = NULL){
     }
 
     return dDiff;
+}
+
+double getAcreHardness(int height)
+{
+    const CBlockIndex* blockindex = getAcreIndex(height);
+    
+    int nShift = (blockindex->nBits >> 24) & 0xff;
+
+    double dDiff =
+        (double)0x0000ffff / (double)(blockindex->nBits & 0x00ffffff);
+
+    while (nShift < 29)
+    {
+        dDiff *= 256.0;
+        nShift++;
+    }
+    while (nShift > 29)
+    {
+        dDiff /= 256.0;
+        nShift--;
+    }
+
+    return dDiff;
+}
+
+int getAcrePawrate(int height)
+{
+    int lookup = height;
+    
+    double timeDiff = getAcreTime(height) - getAcreTime(1);
+    double timePerBlock = timeDiff / lookup;
+
+    return (boost::int64_t)(((double)getAcreHardness(height) * pow(2.0, 32)) / timePerBlock);
+}
+
+const CBlockIndex* getAcreIndex(int height)
+{
+    std::string hex = getAcreHash(height);
+    uint256 hash(hex);
+    return mapBlockIndex[hash];
+}
+
+std::string getAcreHash(int Height)
+{
+    if(Height > pindexBest->nHeight) { return "351c6703813172725c6d660aa539ee6a3d7a9fe784c87fae7f36582e3b797058"; }
+    if(Height < 0) { return "351c6703813172725c6d660aa539ee6a3d7a9fe784c87fae7f36582e3b797058"; }
+    int desiredheight;
+    desiredheight = Height;
+    if (desiredheight < 0 || desiredheight > nBestHeight)
+        return 0;
+        
+    CBlock block;
+    CBlockIndex* pblockindex = mapBlockIndex[hashBestChain];
+    while (pblockindex->nHeight > desiredheight)
+        pblockindex = pblockindex->pprev;
+    return pblockindex->phashBlock->GetHex();
+}
+
+int getAcreTime(int Height)
+{
+    std::string strHash = getAcreHash(Height);
+    uint256 hash(strHash);
+
+    if (mapBlockIndex.count(hash) == 0)
+        return 0;
+
+    CBlock block;
+    CBlockIndex* pblockindex = mapBlockIndex[hash];
+    return pblockindex->nTime;
+}
+
+std::string getAcreMerkle(int Height)
+{
+    std::string strHash = getAcreHash(Height);
+    uint256 hash(strHash);
+    
+    if (mapBlockIndex.count(hash) == 0)
+        return 0;
+
+    CBlock block;
+    CBlockIndex* pblockindex = mapBlockIndex[hash];
+    return pblockindex->hashMerkleRoot.ToString().substr(0,10).c_str();
+}
+
+int getAcrenBits(int Height)
+{
+    std::string strHash = getAcreHash(Height);
+    uint256 hash(strHash);
+    
+    if (mapBlockIndex.count(hash) == 0)
+        return 0;
+
+    CBlock block;
+    CBlockIndex* pblockindex = mapBlockIndex[hash];
+    return pblockindex->nBits;
+}
+
+int getAcreNonce(int Height)
+{
+    std::string strHash = getAcreHash(Height);
+    uint256 hash(strHash);
+
+    if (mapBlockIndex.count(hash) == 0)
+        return 0;
+
+    CBlock block;
+    CBlockIndex* pblockindex = mapBlockIndex[hash];
+    return pblockindex->nNonce;
+}
+
+std::string getAcreDebug(int Height)
+{
+    std::string strHash = getAcreHash(Height);
+    uint256 hash(strHash);
+
+    if (mapBlockIndex.count(hash) == 0)
+        return 0;
+
+    CBlock block;
+    CBlockIndex* pblockindex = mapBlockIndex[hash];
+    return pblockindex->ToString();
+}
+
+int acresInPastHours(int hours)
+{
+    int wayback = hours * 3600;
+    bool check = true;
+    int height = pindexBest->nHeight;
+    int heightHour = pindexBest->nHeight;
+    int utime = (int)time(NULL);
+    int target = utime - wayback;
+    
+    while(check)
+    {
+        if(getAcreTime(heightHour) < target)
+        {
+            check = false;
+            return height - heightHour;
+        } else {
+            heightHour = heightHour - 1;
+        }
+    }
+}
+
+double getTxTotalValue(std::string txid)
+{
+    uint256 hash;
+    hash.SetHex(txid);
+
+    CTransaction tx;
+    uint256 hashBlock = 0;
+    if (!GetTransaction(hash, tx, hashBlock))
+        return 51;
+    
+    CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION);
+    ssTx << tx;
+
+    double value = 0;
+    double buffer = 0;
+    for (unsigned int i = 0; i < tx.vout.size(); i++)
+    {
+        const CTxOut& txout = tx.vout[i];
+ 
+        buffer = value + convertCoins(txout.nValue);
+        value = buffer;
+    }
+
+    return value;
+}
+
+double convertCoins(int64 amount)
+{
+    return (double)amount / (double)COIN;
+}
+
+    
+
+std::string getInputs(std::string)
+{
+    std::string lol = "lol";
+    return lol;
+}
+
+std::string getOutputs(std::string txid)
+{
+    uint256 hash;
+    hash.SetHex(txid);
+
+    CTransaction tx;
+    uint256 hashBlock = 0;
+    if (!GetTransaction(hash, tx, hashBlock))
+        return "fail";
+    
+    CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION);
+    ssTx << tx;
+
+    std::string str = "";
+    for (unsigned int i = 0; i < tx.vout.size(); i++)
+    {
+        const CTxOut& txout = tx.vout[i];
+ 
+        std::string lol4;
+        std::string lol = txout.scriptPubKey.GetID().ToString(); 
+        std::string lol2 = EncodeBase58(txout.scriptPubKey);
+        std::string lol3 = CBitcoinAddress(lol).ToString();
+        std::vector<unsigned char> vch(txout.scriptPubKey);
+        std::string lol5 = EncodeBase58Check(vch);
+        
+      //  std::string lol6;
+      //  vector<CTxDestination> addresses = txout.scriptPubKey.GetID();
+      //  BOOST_FOREACH(const CTxDestination& addr, addresses)
+      //  lol6 = CBitcoinAddress(addr).ToString();
+        
+        double buffer = convertCoins(txout.nValue);
+        std::string amount = boost::to_string(buffer);
+        str.append(lol3);
+        str.append(": ");And
+        str.append(amount);
+        str.append(" FOX");
+        str.append("\n");        
+    }
+
+    return str;
 }
 
 double GetEstimatedNextHardness()

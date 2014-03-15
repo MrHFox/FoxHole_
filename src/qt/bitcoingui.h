@@ -11,6 +11,7 @@ class TransactionView;
 class OverviewPage;
 class MiningPage;
 class StatisticsPage;
+class AcreBrowser;
 class AddressBookPage;
 class SendCoinsDialog;
 class SignVerifyMessageDialog;
@@ -64,6 +65,7 @@ private:
     OverviewPage *overviewPage;
     MiningPage *miningPage;
     StatisticsPage *statisticsPage;
+    AcreBrowser *acreBrowser;
     QWidget *transactionsPage;
     AddressBookPage *addressBookPage;
     AddressBookPage *receiveCoinsPage;
@@ -81,6 +83,7 @@ private:
     QAction *overviewAction;
     QAction *miningAction;
     QAction *statisticsAction;
+    QAction *acreAction;
     QAction *historyAction;
     QAction *quitAction;
     QAction *sendCoinsAction;
@@ -99,6 +102,7 @@ private:
     QAction *toggleHideAction;
     QAction *exportAction;
     QAction *encryptWalletAction;
+    QAction *unlockWalletAction;
     QAction *backupWalletAction;
     QAction *changePassphraseAction;
     QAction *aboutQtAction;
@@ -153,6 +157,8 @@ private slots:
     void gotoMiningPage();
     /** Switch to statistics page*/
     void gotoStatisticsPage();
+    /** Switch to acre explorer*/
+    void gotoAcreBrowser();
     /** Switch to history (transactions) page */
     void gotoHistoryPage();
     /** Switch to address book page */

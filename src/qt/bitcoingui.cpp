@@ -28,12 +28,14 @@
 #include "overviewpage.h"
 #include "miningpage.h"
 #include "statisticspage.h"
+#include "acrebrowser.h"
 #include "bitcoinunits.h"
 #include "guiconstants.h"
 #include "askpassphrasedialog.h"
 #include "notificator.h"
 #include "guiutil.h"
 #include "rpcconsole.h"
+#include "foxcoinfunction.h"
 
 #ifdef Q_WS_MAC
 #include "macdockiconhandler.h"
@@ -106,6 +108,8 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     miningPage = new MiningPage(this);
     
     statisticsPage = new StatisticsPage(this);
+    
+    acreBrowser = new AcreBrowser(this);
 
     transactionsPage = new QWidget(this);
     QVBoxLayout *vbox = new QVBoxLayout();
@@ -125,6 +129,7 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     centralWidget->addWidget(overviewPage);
     centralWidget->addWidget(miningPage);
     centralWidget->addWidget(statisticsPage);
+    centralWidget->addWidget(acreBrowser);
     centralWidget->addWidget(transactionsPage);
     centralWidget->addWidget(addressBookPage);
     centralWidget->addWidget(receiveCoinsPage);
@@ -218,6 +223,11 @@ void BitcoinGUI::createActions()
     statisticsAction->setToolTip(tr("View statistics"));
     statisticsAction->setCheckable(true);
     tabGroup->addAction(statisticsAction);
+    
+    acreAction = new QAction(QIcon(":/icons/editcopy"), tr("&Acre Explorer"), this);
+    acreAction->setToolTip(tr("Explore the FoxChain"));
+    acreAction->setCheckable(true);
+    tabGroup->addAction(acreAction);
 
     historyAction = new QAction(QIcon(":/icons/history"), tr("&Scrolls"), this);
     historyAction->setToolTip(tr("Browse transaction history"));
@@ -262,6 +272,7 @@ void BitcoinGUI::createActions()
     connect(overviewAction, SIGNAL(triggered()), this, SLOT(gotoOverviewPage()));
     connect(miningAction, SIGNAL(triggered()), this, SLOT(gotoMiningPage()));
     connect(statisticsAction, SIGNAL(triggered()), this, SLOT(gotoStatisticsPage()));
+    connect(acreAction, SIGNAL(triggered()), this, SLOT(gotoAcreBrowser()));
     connect(historyAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(historyAction, SIGNAL(triggered()), this, SLOT(gotoHistoryPage()));
     connect(addressBookAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
@@ -298,7 +309,7 @@ void BitcoinGUI::createActions()
     exportAction = new QAction(QIcon(":/icons/export"), tr("&Export..."), this);
     exportAction->setToolTip(tr("Export the data in the current tab to a file"));
     encryptWalletAction = new QAction(QIcon(":/icons/lock_closed"), tr("&Barricade FoxHole..."), this);
-    encryptWalletAction->setToolTip(tr("Barricade or de-barricade FoxHole"));
+    encryptWalletAction->setToolTip(tr("Barricade or FoxHole"));
     encryptWalletAction->setCheckable(true);
     backupWalletAction = new QAction(QIcon(":/icons/filesave"), tr("&Backup FoxHole..."), this);
     backupWalletAction->setToolTip(tr("Backup FoxHole to another location"));
@@ -389,6 +400,7 @@ void BitcoinGUI::createToolBars()
     toolbar->addAction(addressBookAction);
     toolbar->addAction(miningAction);
     toolbar->addAction(statisticsAction);
+    toolbar->addAction(acreAction);
 #ifdef FIRST_CLASS_MESSAGING
     toolbar->addAction(firstClassMessagingAction);
 #endif
@@ -639,7 +651,7 @@ void BitcoinGUI::setNumBlocks(int count, int nTotalBlocks)
         tooltip = tr("Downloaded %1 acres of transaction history.").arg(count);
     }
 
-    tooltip = tr("Current difficulty is %1.").arg(clientModel->GetDifficulty()) + QString("<br>") + tooltip;
+    tooltip = tr("Current difficulty is %1.").arg(getHardness()) + QString("<br>") + tooltip;
 
     QDateTime now = QDateTime::currentDateTime();
     QDateTime lastBlockDate = clientModel->getLastBlockDate();
@@ -828,6 +840,15 @@ void BitcoinGUI::gotoStatisticsPage()
 {
     statisticsAction->setChecked(true);
     centralWidget->setCurrentWidget(statisticsPage);
+
+    exportAction->setEnabled(false);
+    disconnect(exportAction, SIGNAL(triggered()), 0, 0);
+}
+
+void BitcoinGUI::gotoAcreBrowser()
+{
+    acreAction->setChecked(true);
+    centralWidget->setCurrentWidget(acreBrowser);
 
     exportAction->setEnabled(false);
     disconnect(exportAction, SIGNAL(triggered()), 0, 0);
