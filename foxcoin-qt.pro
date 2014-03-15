@@ -178,6 +178,7 @@ HEADERS += src/qt/bitcoingui.h \
     src/scrypt.h \
     src/qt/miningpage.h \
     src/qt/statisticspage.h \
+	src/qt/acrebrowser.h \
     src/version.h \
     src/qt/rpcconsole.h
 
@@ -247,6 +248,7 @@ SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
     src/scrypt.c \
     src/qt/miningpage.cpp \
     src/qt/statisticspage.cpp \
+	src/qt/acrebrowser.cpp \
     src/noui.cpp
 
 RESOURCES += \
@@ -270,6 +272,7 @@ FORMS += \
     src/qt/forms/rpcconsole.ui \
     src/qt/forms/miningpage.ui \
     src/qt/forms/statisticspage.ui \
+	src/qt/forms/acrebrowser.ui \
     src/qt/forms/optionsdialog.ui
 
 contains(USE_QRCODE, 1) {
