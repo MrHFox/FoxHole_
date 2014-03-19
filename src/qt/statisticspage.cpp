@@ -20,6 +20,9 @@ StatisticsPage::StatisticsPage(QWidget *parent) :
     setFixedSize(400, 420);
     
     connect(ui->startButton, SIGNAL(pressed()), this, SLOT(updateStatistics()));
+    connect(ui->update, SIGNAL(pressed()), this, SLOT(updateInfo()));
+    connect(ui->calc, SIGNAL(pressed()), this, SLOT(calculate()));
+    connect(ui->node, SIGNAL(pressed()), this, SLOT(updateNet()));
 }
 
 int heightPrevious = -1;
@@ -146,9 +149,71 @@ void StatisticsPage::updatePrevious(int nHeight, double nSubsidy, double pHardne
     volumePrevious = volume;
 }
 
+void StatisticsPage::updateInfo()
+{
+    int netpawrate = getNetworkPawsPS();
+    double hardness = getHardness();
+    double reward = getReward();
+    double profitPerKP = (1000 / (double)netpawrate) * reward * 60 * 24;
+    double profitPerMP = (1000000 / (double)netpawrate) * reward * 60 * 24;
+    double netpawrate2 = 0.000;
+    netpawrate2 = ((double)netpawrate / 1000);
+    QString QPawrate = QString::number(netpawrate2, 'f', 3);
+    QString QReward = QString::number(reward, 'f', 6);
+    QString QHardness = QString::number(hardness, 'f', 6);
+    QString QKP = QString::number(profitPerKP, 'f', 6);
+    QString QMP = QString::number(profitPerMP, 'f', 6);
+    ui->pawrate->setText(QPawrate + " KP/s");
+    ui->hardness->setText(QHardness);
+    ui->reward->setText(QReward + " FOX");
+    ui->KP->setText(QKP + " FOX");
+    ui->MP->setText(QMP + " FOX");
+}
+
+void StatisticsPage::calculate()
+{
+    int netpawrate = getNetworkPawsPS();
+    int target = ui->target->value();
+    int multiplier = pawMultiplier();
+    double reward = getReward();
+    double final = ((target * multiplier) / (double)netpawrate) * reward * 60 * 24;
+    QString QFinal = QString::number(final, 'f', 6);
+    ui->end->setText("<b>Expected Profit: " + QFinal + " FOX /day</b>");
+    updateInfo();
+}
+
+int StatisticsPage::pawMultiplier()
+{
+    int s = ui->combo->currentIndex();
+    int i = 1;
+    int ib = 1;
+    if(s == 0)
+    {
+        return 1 ;
+    } else {
+        while(s > 0)
+        {
+            s--;
+            i = ib * 1000;
+            ib = i;
+        }
+        return i;
+    }
+}
+
+void StatisticsPage::updateNet()
+{
+    std::string nodes = getNodeInfo();
+    QString QNodes = QString::fromUtf8(nodes.c_str());
+    ui->nodes->setText(QNodes);
+}
+
 void StatisticsPage::setModel(ClientModel *model)
 {
+    updateStatistics();
     this->model = model;
+    ui->versionLabel->setText(model->formatFullVersion());
+    updateInfo();
 }
 
 StatisticsPage::~StatisticsPage()

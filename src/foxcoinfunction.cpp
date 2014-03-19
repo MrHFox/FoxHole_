@@ -11,6 +11,7 @@
 #include "net.h"
 #include "wallet.h"
 #include "foxcoinfunction.h"
+#include "util.h"
 
 using namespace std;
 using namespace boost;
@@ -301,14 +302,6 @@ double convertCoins(int64 amount)
     return (double)amount / (double)COIN;
 }
 
-    
-
-std::string getInputs(std::string)
-{
-    std::string lol = "lol";
-    return lol;
-}
-
 std::string getOutputs(std::string txid)
 {
     uint256 hash;
@@ -326,28 +319,138 @@ std::string getOutputs(std::string txid)
     for (unsigned int i = 0; i < tx.vout.size(); i++)
     {
         const CTxOut& txout = tx.vout[i];
- 
-        std::string lol4;
-        std::string lol = txout.scriptPubKey.GetID().ToString(); 
-        std::string lol2 = EncodeBase58(txout.scriptPubKey);
-        std::string lol3 = CFoxcoinAddress(lol).ToString();
-        std::vector<unsigned char> vch(txout.scriptPubKey);
-        std::string lol5 = EncodeBase58Check(vch);
-        
-      //  std::string lol6;
-      //  vector<CTxDestination> addresses = txout.scriptPubKey.GetID();
-      //  BOOST_FOREACH(const CTxDestination& addr, addresses)
-      //  lol6 = CFoxcoinAddress(addr).ToString();
-        
+        CTxDestination source;
+        ExtractDestination(txout.scriptPubKey, source);  
+        CFoxcoinAddress addressSource(source); 
+        std::string lol7 = addressSource.ToString();
         double buffer = convertCoins(txout.nValue);
         std::string amount = boost::to_string(buffer);
-        str.append(lol3);
+        str.append(lol7);
         str.append(": ");
         str.append(amount);
         str.append(" FOX");
         str.append("\n");        
     }
 
+    return str;
+}
+
+std::string getInputs(std::string txid)
+{
+    uint256 hash;
+    hash.SetHex(txid);
+
+    CTransaction tx;
+    uint256 hashBlock = 0;
+    if (!GetTransaction(hash, tx, hashBlock))
+        return "fail";
+    
+    CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION);
+    ssTx << tx;
+
+    std::string str = "";
+    for (unsigned int i = 0; i < tx.vin.size(); i++)
+    {     
+        uint256 hash;
+        const CTxIn& vin = tx.vin[i];
+        hash.SetHex(vin.prevout.hash.ToString());
+        CTransaction wtxPrev;                                     
+        uint256 hashBlock = 0;
+        if (!GetTransaction(hash, wtxPrev, hashBlock))
+             return "fail";
+    
+        CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION);
+        ssTx << wtxPrev;
+
+        CTxDestination source;
+        ExtractDestination(wtxPrev.vout[vin.prevout.n].scriptPubKey, source);  
+        CFoxcoinAddress addressSource(source); 
+        std::string lol6 = addressSource.ToString();
+        const CScript target = wtxPrev.vout[vin.prevout.n].scriptPubKey;
+        double buffer = convertCoins(getInputValue(wtxPrev, target));
+        std::string amount = boost::to_string(buffer);
+        str.append(lol6);
+        str.append(": ");
+        str.append(amount);
+        str.append(" FOX");
+        str.append("\n");        
+    }
+
+    return str;  
+}
+
+int64 getInputValue(CTransaction tx, CScript target)
+{
+    for (unsigned int i = 0; i < tx.vin.size(); i++)
+    {
+        const CTxOut& txout = tx.vout[i];
+        if(txout.scriptPubKey == target)
+        {
+            return txout.nValue;
+        }
+    }
+}
+
+double getTxFees(std::string txid)
+{
+    uint256 hash;
+    hash.SetHex(txid);
+
+    CTransaction tx;
+    uint256 hashBlock = 0;
+    if (!GetTransaction(hash, tx, hashBlock))
+        return 51;
+    
+    CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION);
+    ssTx << tx;
+
+    double value = 0;
+    double buffer = 0;
+    for (unsigned int i = 0; i < tx.vout.size(); i++)
+    {
+        const CTxOut& txout = tx.vout[i];
+ 
+        buffer = value + convertCoins(txout.nValue);
+        value = buffer;
+    }
+    
+    double value0 = 0;
+    double buffer0 = 0;
+    for (unsigned int i = 0; i < tx.vin.size(); i++)
+    {     
+        uint256 hash0;
+        const CTxIn& vin = tx.vin[i];
+        hash0.SetHex(vin.prevout.hash.ToString());
+        CTransaction wtxPrev;  
+        uint256 hashBlock0 = 0;
+        if (!GetTransaction(hash0, wtxPrev, hashBlock0))
+             return 0;
+        CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION);
+        ssTx << wtxPrev;
+        const CScript target = wtxPrev.vout[vin.prevout.n].scriptPubKey;
+        buffer0 = value0 + convertCoins(getInputValue(wtxPrev, target));
+        value0 = buffer0;
+    }
+
+    return value0 - value;
+}
+
+std::string getNodeInfo()
+{
+    LOCK(cs_vNodes);
+    int i = vNodes.size();
+    std::string str;
+    while(i > 0)
+    {
+        i--;
+        CNodeStats stats;
+        CNode* pnode = vNodes[i];
+        str.append(pnode->addrName);
+        str.append(" [");    
+        str.append(pnode->strSubVer);
+        str.append("]");
+        str.append("\n");
+    }
     return str;
 }
 

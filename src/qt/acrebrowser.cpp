@@ -13,6 +13,35 @@ AcreBrowser::AcreBrowser(QWidget *parent) :
     
     setFixedSize(400, 420);
     
+    ui->nextButton->hide();
+    ui->previousButton->hide();
+    ui->txID->hide();
+    ui->txLabel->hide();
+    ui->valueLabel->hide();
+    ui->valueBox->hide();
+    ui->inputLabel->hide();
+    ui->inputBox->hide();
+    ui->outputLabel->hide();
+    ui->outputBox->hide();    
+    ui->heightLabel->hide();
+    ui->heightLabel_2->hide();
+    ui->hashLabel->hide();
+    ui->hashBox->hide();
+    ui->merkleLabel->hide();
+    ui->merkleBox->hide();
+    ui->nonceLabel->hide();
+    ui->nonceBox->hide();
+    ui->bitsLabel->hide();
+    ui->bitsBox->hide();
+    ui->timeLabel->hide();
+    ui->timeBox->hide();
+    ui->hardLabel->hide();
+    ui->hardBox->hide();
+    ui->pawLabel->hide();
+    ui->pawBox->hide();
+    ui->feesLabel->hide();
+    ui->feesBox->hide();
+        
     connect(ui->acreButton, SIGNAL(pressed()), this, SLOT(acreClicked()));
     connect(ui->txButton, SIGNAL(pressed()), this, SLOT(txClicked()));
     connect(ui->nextButton, SIGNAL(pressed()), this, SLOT(nextAcre()));
@@ -47,6 +76,10 @@ void AcreBrowser::updateExplorer(bool acre)
         ui->hardBox->show();;
         ui->pawLabel->show();
         ui->pawBox->show();
+        ui->nextButton->show();
+        ui->previousButton->show();
+        ui->feesLabel->hide();
+        ui->feesBox->hide(); 
         int height = ui->heightBox->value();
         int Pawrate = getAcrePawrate(height);
         double Pawrate2 = 0.000;
@@ -92,6 +125,8 @@ void AcreBrowser::updateExplorer(bool acre)
         ui->hardBox->hide();
         ui->pawLabel->hide();
         ui->pawBox->hide();
+        ui->nextButton->hide();
+        ui->previousButton->hide();
         ui->txID->show();
         ui->txLabel->show();
         ui->valueLabel->show();
@@ -100,15 +135,23 @@ void AcreBrowser::updateExplorer(bool acre)
         ui->inputBox->show();
         ui->outputLabel->show();
         ui->outputBox->show();
+        ui->feesLabel->show();
+        ui->feesBox->show();
         std::string txid = ui->txBox->text().toUtf8().constData();
         double value = getTxTotalValue(txid);
+        double fees = getTxFees(txid);
         std::string outputs = getOutputs(txid);
+        std::string inputs = getInputs(txid);
         QString QValue = QString::number(value, 'f', 6);
         QString QID = QString::fromUtf8(txid.c_str());
         QString QOutputs = QString::fromUtf8(outputs.c_str());
+        QString QInputs = QString::fromUtf8(inputs.c_str());
+        QString QFees = QString::number(fees, 'f', 6);
         ui->valueBox->setText(QValue + " FOX");
         ui->txID->setText(QID);
         ui->outputBox->setText(QOutputs);
+        ui->inputBox->setText(QInputs);
+        ui->feesBox->setText(QFees + " FOX");
     }
 }
 

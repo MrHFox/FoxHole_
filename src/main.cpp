@@ -977,7 +977,7 @@ unsigned int static KimotoGravityWell(const CBlockIndex* pindexLast, const CBloc
     const CBlockIndex *BlockLastSolved = pindexLast;
     const CBlockIndex *BlockReading = pindexLast;
     const CBlock *BlockCreating = pblock;
-BlockCreating = BlockCreating;
+    BlockCreating = BlockCreating;
     uint64 PastBlocksMass = 0;
     int64 PastRateActualSeconds = 0;
     int64 PastRateTargetSeconds = 0;
@@ -1982,6 +1982,16 @@ bool CBlock::AcceptBlock()
     // Check timestamp against prev
     if (GetBlockTime() <= pindexPrev->GetMedianTimePast())
         return error("AcceptBlock() : block's timestamp is too early");
+    
+    // Prevent blocks from too far in the future
+    if (GetBlockTime() > GetAdjustedTime() + 30 * 60) {
+        return error("AcceptBlock() : block's timestamp too far in the future");
+    }
+
+    // Check timestamp is not too far in the past
+    if (GetBlockTime() <= pindexPrev->GetBlockTime() - 30 * 60) {
+        return error("AcceptBlock() : block's timestamp is too early compare to last block");
+    }
 
     // Check that all transactions are finalized
     BOOST_FOREACH(const CTransaction& tx, vtx)

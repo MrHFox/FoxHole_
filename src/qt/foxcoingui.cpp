@@ -78,7 +78,7 @@ FoxcoinGUI::FoxcoinGUI(QWidget *parent):
     notificator(0),
     rpcConsole(0)
 {
-    resize(850, 550);
+    resize(1000, 558);
     setWindowTitle(tr("FoxCoin") + " - " + tr("FoxHole"));
 #ifndef Q_WS_MAC
     qApp->setWindowIcon(QIcon(":icons/foxcoin"));

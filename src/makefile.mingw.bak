@@ -50,7 +50,8 @@ OBJS= \
     obj/main.o \
     obj/net.o \
     obj/protocol.o \
-    obj/bitcoinrpc.o \
+    obj/foxcoinrpc.o \
+	obj/foxcoinfunction.o \
     obj/rpcdump.o \
     obj/rpcnet.o \
     obj/rpcrawtransaction.o \

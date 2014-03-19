@@ -42,10 +42,13 @@ public:
     double hardnessPrevious;
     
 public slots:
+    int pawMultiplier();
     
+    void updateInfo();
+    void calculate();
     void updateStatistics();
     void updatePrevious(int, double, double, double, double, int, int);
-
+    void updateNet();
 private slots:
 
 private:
