@@ -23,6 +23,7 @@ StatisticsPage::StatisticsPage(QWidget *parent) :
     connect(ui->update, SIGNAL(pressed()), this, SLOT(updateInfo()));
     connect(ui->calc, SIGNAL(pressed()), this, SLOT(calculate()));
     connect(ui->node, SIGNAL(pressed()), this, SLOT(updateNet()));
+    connect(ui->add, SIGNAL(pressed()), this, SLOT(nodeAdd()));
 }
 
 int heightPrevious = -1;
@@ -214,6 +215,24 @@ void StatisticsPage::setModel(ClientModel *model)
     this->model = model;
     ui->versionLabel->setText(model->formatFullVersion());
     updateInfo();
+    updateNet();
+}
+
+void StatisticsPage::nodeAdd()
+{
+    std::string node = ui->addnode->text().toStdString();
+    bool s = addnode(node);
+    QString m;
+    if(s)
+    {
+        m = "<b><font color=green>Successfully connected to node</font></b>";
+    } else {
+        m = "<b><font color=red>Node connection failed</font></b>";
+    }
+    ui->noderesult->setText(m);
+    updateNet();
+    updateInfo();
+    updateStatistics();
 }
 
 StatisticsPage::~StatisticsPage()

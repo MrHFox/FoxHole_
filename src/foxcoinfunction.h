@@ -27,6 +27,8 @@ std::string getOutputs(std::string);
 std::string getAcreHash(int);
 std::string getAcreMerkle(int);
 
+bool addnode(std::string);
+
 const CBlockIndex* getAcreIndex(int);
 
 int64 getInputValue(CTransaction, CScript);

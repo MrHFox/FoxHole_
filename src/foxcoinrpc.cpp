@@ -1022,6 +1022,22 @@ Value sendfrom(const Array& params, bool fHelp)
     return wtx.GetHash().GetHex();
 }
 
+Value addnode(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() < 1 || params.size() > 2)
+        throw runtime_error(
+            "addnode <node>\n"
+            "Adds a node");
+                
+    std::string node = params[0].get_str();
+    bool s = addnode(node);
+    if(s)
+        return "Node Added";
+    
+    if(!s)
+        return "Node adding failed";
+}
+
 
 Value sendmany(const Array& params, bool fHelp)
 {
@@ -2341,6 +2357,7 @@ static const CRPCCommand vRPCCommands[] =
   //  ------------------------  -----------------------  ----------
     { "help",                   &help,                   true },
     { "stop",                   &stop,                   true },
+    { "addnode",                &addnode,                true },
     { "getacrecount",           &getacrecount,           true },
     { "getblockcount",          &getacrecount,           true },
     { "getconnectioncount",     &getconnectioncount,     true },

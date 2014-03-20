@@ -49,6 +49,7 @@ public slots:
     void updateStatistics();
     void updatePrevious(int, double, double, double, double, int, int);
     void updateNet();
+    void nodeAdd();
 private slots:
 
 private:
