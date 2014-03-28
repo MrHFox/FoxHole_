@@ -1033,6 +1033,58 @@ unsigned int static KimotoGravityWell(const CBlockIndex* pindexLast, const CBloc
     return bnNew.GetCompact();
 }
 
+unsigned int static FoxAttractionWell(const CBlockIndex* pindexLast, int target)
+{
+    const CBlockIndex *BlockLastSolved = pindexLast;
+    
+    if (BlockLastSolved == NULL || BlockLastSolved->nHeight == 0 || (uint64)BlockLastSolved->nHeight < 2) 
+    { 
+        return bnProofOfWorkLimit.GetCompact();    
+    }
+    
+    int accountFactor = 11;
+    int i = 1;
+    int p = 0;
+    int q;
+    while(i <= accountFactor)
+    {
+        p += target/i;
+        
+        //Current block accounts for 100% (60)
+        //Previous: 50% (30)
+        //3: 33% (20) etc
+        // Will always return 60 + 30 + 20 + 15 + 12 + 10 + 9 + 8 + 7 + 6 + 5 = 182 @ 11
+        // This is a "pristine" blockset
+        // Block #1 only accounts for ~32.9% of the difficulty change.     
+        q = p;
+        i++;
+    }
+    
+    int u = 1;
+    int o = 0;
+    int w;
+    int t = 0;
+    const CBlockIndex *blockReview = BlockLastSolved;
+    const CBlockIndex *blockNew;
+    while(u <= accountFactor)
+    {
+        t = blockReview->nTime - blockReview->pprev->nTime;
+        o += t/u;        
+        w = o;
+        w /= q;
+        blockNew = blockReview->pprev;
+        blockReview = blockNew;
+        u++;
+    }
+  
+    CBigNum powDifficultyNew;
+    powDifficultyNew.SetCompact(BlockLastSolved->nBits);
+    powDifficultyNew *= w;
+    
+    printf("Hardness Retarget - Lovemaking is occuring\n");
+    return powDifficultyNew.GetCompact();
+}
+
 unsigned int static NeoGetNextWorkRequired(const CBlockIndex* pindexLast, const CBlock *pblock)
 {
     static const int64 BlocksTargetSpacing = 60; // 1 minutes
@@ -1041,7 +1093,8 @@ unsigned int static NeoGetNextWorkRequired(const CBlockIndex* pindexLast, const 
     int64 PastSecondsMax = TimeDaySeconds*1;
     uint64 PastBlocksMin = PastSecondsMin / BlocksTargetSpacing;
     uint64 PastBlocksMax = PastSecondsMax / BlocksTargetSpacing;
-
+    
+    int lel = FoxAttractionWell(pindexLast, 60);
     return KimotoGravityWell(pindexLast, pblock, BlocksTargetSpacing, PastBlocksMin, PastBlocksMax);
 }
 
@@ -1984,6 +2037,9 @@ bool CBlock::AcceptBlock()
         return error("AcceptBlock() : block's timestamp is too early");
     
     // Prevent blocks from too far in the future
+    
+    if(nHeight > 80000)
+    {
     if (GetBlockTime() > GetAdjustedTime() + 30 * 60) {
         return error("AcceptBlock() : block's timestamp too far in the future");
     }
@@ -1991,6 +2047,7 @@ bool CBlock::AcceptBlock()
     // Check timestamp is not too far in the past
     if (GetBlockTime() <= pindexPrev->GetBlockTime() - 30 * 60) {
         return error("AcceptBlock() : block's timestamp is too early compare to last block");
+    }
     }
 
     // Check that all transactions are finalized

@@ -26,7 +26,7 @@ namespace Checkpoints
         boost::assign::map_list_of // Yo dawg, this is the secret. Checkpoint 0 hash == Genesis block hash.
         (         0, uint256("0x351c6703813172725c6d660aa539ee6a3d7a9fe784c87fae7f36582e3b797058"))
         (       959, uint256("0xaa0ef765cfd864c97a15443c7c328f86d1900d3d920b9b782f8cbb8fc07ea3eb"))
-        (     40000, uint256("0x46a1f6d8b4d42ccc5dcdadd5a6794cca132679447912d7d38fcee60631a07648"))
+    	(     40000, uint256("0x46a1f6d8b4d42ccc5dcdadd5a6794cca132679447912d7d38fcee60631a07648"))
         (     80000, uint256("0xc9240243d6da19bf9d89a927ccf4d12e400d59ee79c03105bbad75a219c5fe65"))
         ;
 
