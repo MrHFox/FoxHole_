@@ -1,3 +1,3 @@
 FoxCoin (FOX)
-
-https://bitcointalk.org/index.php?topic=420727.0
+New generation - FOXHOLE
+![alt-FOXHOLE](https://github.com/MrHFox/FoxHole_/blob/master/-lisice.jpg "Save your coins in FoxHole and multiply")
